@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "tigergraph-skills",
+  "displayName": "TigerGraph Skills",
+  "version": "0.1.0",
+  "description": "TigerGraph knowledge for agents: CLI commands and high-level architecture.",
+  "author": {
+    "name": "TigerGraph Inc.",
+    "email": "support@tigergraph.com",
+    "url": "https://www.tigergraph.com"
+  },
+  "homepage": "https://github.com/tigergraph/agent-skills#readme",
+  "repository": "https://github.com/tigergraph/agent-skills",
+  "license": "Apache-2.0",
+  "keywords": ["tigergraph", "graph-database", "gsql", "gadmin", "skills"]
+}
