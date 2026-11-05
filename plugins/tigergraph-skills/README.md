@@ -1,11 +1,11 @@
 # tigergraph-skills
 
-Skills that teach an AI agent how TigerGraph works and how to operate it from the command line. The skills are plain knowledge and need no connection to a database, so they work in any agent that loads skills. Pair them with the `tigergraph` MCP plugin when the agent should also query or change a live graph.
+Skills that teach an AI agent how a TigerGraph cluster works and how to operate it from the command line: answer questions, diagnose problems from logs, change configuration, take backups. They need no database connection of their own, so they work in any agent that loads skills. Pair them with the `tigergraph` MCP plugin when the agent should also query or change a live graph.
 
 | Skill | Use it for |
 |---|---|
 | `tigergraph-cli` | `gadmin`, `gsql` and the cluster scripts on a TigerGraph node |
-| `tigergraph-architecture` | Services, partitions and replicas, and how queries and loading flow through a cluster |
+| `tigergraph-cluster` | Services, partitions and replicas, and how queries and loading flow through a cluster |
 
 ## Install
 

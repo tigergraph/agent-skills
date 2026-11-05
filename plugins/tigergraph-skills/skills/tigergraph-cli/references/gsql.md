@@ -1,11 +1,69 @@
 # gsql
 
-<!-- OUTLINE -->
+The client for the GSQL language. It talks to the GSQL service, so `gadmin status gsql` must show it online.
 
-- Needs the GSQL service up: `gadmin status gsql`.
-- Modes: REPL, one-line statement, script file, `-g <graph>`; common flags (`-u`, `-p`, `--version`); `--reset` is destructive.
-- REPL basics: `ls`, `USE GRAPH`, `USE GLOBAL`, `SHOW VERTEX|EDGE|GRAPH`, `help basic`, `help query`.
-- Minimal end-to-end example: create vertex and edge types, a graph, a loading job, run it, then create, install and run a query; interpreted vs installed.
-- Users and roles: `CREATE USER`, `GRANT ROLE`, `CREATE SECRET`.
-- Connection refused: check and start GSQL; remote client via `gsql_server_ip_config`.
-- Pointer: writing GSQL queries is out of scope for this skill.
+## Ways to run it
+
+```
+gsql                          # interactive shell
+gsql 'ls'                     # one statement, then exit
+gsql my_script.gsql           # run a file of statements
+gsql -g <graph> '...'         # set the working graph for this call
+gsql -u <user> '...'          # log in as <user>; prompts for the password (let the user run it)
+```
+
+`gsql -v` prints the version. `gsql --reset` clears the whole catalog and graph store (see `SKILL.md`, "Safety").
+
+## Inside the shell
+
+```
+ls                       # vertex and edge types, graphs, queries, loading jobs
+USE GRAPH <name>         # switch graph (USE GLOBAL for global types)
+SHOW VERTEX <Type>       # one type's definition; also SHOW EDGE, SHOW GRAPH
+help basic               # schema and loading syntax summary
+help query               # query language summary
+```
+
+`help basic` and `help query` show the exact syntax on the installed version, which is safer than recalling it from memory.
+
+## Minimal end-to-end example
+
+```
+CREATE VERTEX Person (PRIMARY_ID id STRING, name STRING)
+CREATE UNDIRECTED EDGE Knows (FROM Person, TO Person)
+CREATE GRAPH social (Person, Knows)
+
+USE GRAPH social
+CREATE LOADING JOB load_people FOR GRAPH social {
+  DEFINE FILENAME f1 = "/path/to/people.csv";
+  LOAD f1 TO VERTEX Person VALUES ($0, $1) USING SEPARATOR=",", HEADER="true";
+}
+RUN LOADING JOB load_people
+
+CREATE QUERY hello(VERTEX<Person> p) FOR GRAPH social { PRINT p; }
+INSTALL QUERY hello
+RUN QUERY hello("p1")
+```
+
+`INSTALL QUERY` compiles the query for production use and can take a while. `INTERPRET QUERY` runs it without installing, which is quicker to iterate on. `DROP ALL` removes every type, graph, job and query, so treat it like `--reset`.
+
+## Loading results
+
+`RUN LOADING JOB` reports per file how many lines loaded and how many were rejected. Afterwards, each run leaves a directory under the loader's log directory (`gadmin log` lists it, e.g. `RESTPP-LOADER` for file loading) named after the graph, job and node, with a `summary` file that counts rejected lines by reason (not enough tokens, invalid attributes, ...) and gives sample line numbers. A load that "didn't add rows" usually means rejected lines, or valid lines whose IDs already existed: loading upserts, so existing IDs update instead of adding vertices. Compare the vertex count before and after, and the file's IDs with existing ones.
+
+## Users and roles
+
+```
+CREATE USER                          # prompts for name and password; the user should run it
+GRANT ROLE <role> ON GRAPH <g> TO <user>
+SHOW USER
+CREATE SECRET <alias>                # secret for requesting REST API tokens
+```
+
+## Cluster helpers
+
+- `gsql --leader` prints which node is the current GSQL leader. Its logs are the ones to read when a GSQL command fails.
+
+## When gsql can't connect
+
+`Connection refused` usually means the GSQL service is down: check `gadmin status gsql` and start it with `gadmin start gsql`. To use a GSQL client on another machine, the remote-client docs page (`gsql-shell/using-a-remote-gsql-client`) covers pointing it at the server (its `--ip` option or a `gsql_server_ip_config` file) and the client version to download.

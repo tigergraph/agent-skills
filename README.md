@@ -5,7 +5,7 @@ Official TigerGraph plugins and skills for AI coding agents such as Claude Code,
 | Plugin | What it gives the agent |
 |---|---|
 | `tigergraph` | The [TigerGraph MCP server](https://github.com/tigergraph/tigergraph-mcp): connect to a TigerGraph deployment, explore the schema, run GSQL and Cypher, load data, and search vectors. |
-| `tigergraph-skills` | TigerGraph knowledge: the command-line tools and the high-level architecture. No connection required. |
+| `tigergraph-skills` | TigerGraph skills for operating a cluster: the command-line tools, and how a cluster is built and behaves. |
 
 ## Install
 
@@ -19,7 +19,7 @@ claude plugin install tigergraph@tigergraph
 
 ### Other agents
 
-Codex, GitHub Copilot CLI, VS Code and Grok read the same marketplace file. Add `tigergraph/agent-skills` as a marketplace in your agent, then install the plugins you need.
+Codex, GitHub Copilot CLI, VS Code and Grok read the same marketplace file (Cursor support is best-effort). Add `tigergraph/agent-skills` as a marketplace in your agent, then install the plugins you need.
 
 To install only the skills with the [skills CLI](https://skills.sh):
 
@@ -32,7 +32,7 @@ npx skills add tigergraph/agent-skills
 | Skill | Use it for |
 |---|---|
 | `tigergraph-cli` | `gadmin`, `gsql` and the cluster scripts on a TigerGraph node |
-| `tigergraph-architecture` | Services, partitions and replicas, and how queries and loading flow through a cluster |
+| `tigergraph-cluster` | Services, partitions and replicas, and how queries and loading flow through a cluster |
 
 ## Version compatibility
 

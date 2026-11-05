@@ -20,7 +20,7 @@
     {
       "name": "tigergraph-skills",
       "source": "./plugins/tigergraph-skills",
-      "description": "TigerGraph knowledge for agents: CLI commands and high-level architecture."
+      "description": "TigerGraph skills for agents: operate a cluster from the command line and understand how it works."
     }
   ]
 }
