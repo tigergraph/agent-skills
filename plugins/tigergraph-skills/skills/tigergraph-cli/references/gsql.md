@@ -47,6 +47,23 @@ RUN QUERY hello("p1")
 
 `INSTALL QUERY` compiles the query for production use and can take a while. `INTERPRET QUERY` runs it without installing, which is quicker to iterate on. `DROP ALL` removes every type, graph, job and query, so treat it like `--reset`.
 
+## What's on the cluster
+
+- `gsql ls` with no graph lists the global vertex and edge types and the graphs; `gsql -g <graph> ls` lists that graph's types, loading jobs and queries, and marks the installed ones. Statements such as `SHOW QUERY *` need a graph (`-g`).
+- Vertex and edge counts: the REST built-in `stat_vertex_number` / `stat_edge_number` (`curl -X POST http://$(gmyip):$(gadmin config get Nginx.Port)/restpp/builtins/<graph> -d '{"function":"stat_vertex_number","type":"*"}'`) returns counts per type (its options are on the `API/built-in-endpoints` docs page). `gstatusgraph` gives approximate per-node sizes.
+
+## Schema changes
+
+Read `gsql ls` first to see whether a type is global (listed without a graph; shared by every graph that uses it) or local to one graph. That decides the command and the blast radius:
+
+- Global types change through a `GLOBAL SCHEMA_CHANGE JOB` (after `USE GLOBAL`), local ones through a graph's `SCHEMA_CHANGE JOB`. A global change affects every graph that uses the type.
+- An attribute's type can't be changed in place. Dropping and re-adding it loses the stored values; adding a new attribute, backfilling it and switching readers over keeps them.
+- After a change, queries and loading jobs that refer to dropped types or attributes become invalid: queries are uninstalled and loading jobs disabled (older releases dropped them), and they must be recreated. GSQL lists what it will disable when the job runs.
+- A `SCHEMA_CHANGE JOB` stays in the catalog after it runs (`DROP JOB` removes it), so its presence doesn't mean it is pending. Check whether its changes are already in the schema (`ls`) and look for the run in the GSQL log (`gadmin log gsql`).
+- `DROP GRAPH` removes the graph, its jobs and queries and its local types; global types it used, and their data, stay.
+
+The docs advise backing up first and avoiding high-traffic periods; check `ddl-and-loading/modifying-a-graph-schema` in the GSQL reference for the user's version (`SKILL.md`, "Official documentation").
+
 ## Loading results
 
 `RUN LOADING JOB` reports per file how many lines loaded and how many were rejected. Afterwards, each run leaves a directory under the loader's log directory (`gadmin log` lists it, e.g. `RESTPP-LOADER` for file loading) named after the graph, job and node, with a `summary` file that counts rejected lines by reason (not enough tokens, invalid attributes, ...) and gives sample line numbers. A load that "didn't add rows" usually means rejected lines, or valid lines whose IDs already existed: loading upserts, so existing IDs update instead of adding vertices. Compare the vertex count before and after, and the file's IDs with existing ones.

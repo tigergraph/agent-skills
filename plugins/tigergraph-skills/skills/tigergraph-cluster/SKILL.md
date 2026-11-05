@@ -1,6 +1,6 @@
 ---
 name: tigergraph-cluster
-description: How TigerGraph works inside — its services (GPE, GSE, GSQL, RESTPP, NGINX, GUI, CTRL, EXE, IFM, ADMIN, DICT, ETCD, ZooKeeper, Kafka, KAFKACONN, KAFKASTRM-LL, and the file and Kafka loaders), the partition × replica cluster model, high availability and failover, data distribution and skew, and how schema changes, data loading and queries flow through a cluster. Use this skill whenever the user asks how TigerGraph works, plans cluster size or HA, sees a service name in `gadmin status` or a log and wants to know what it does, asks why an operation is blocked when a node is down, or needs to know which service to look at for a problem. Does NOT cover running commands — use tigergraph-cli.
+description: How TigerGraph works inside — its services (GPE, GSE, GSQL, RESTPP, NGINX, GUI, CTRL, EXE, IFM, ADMIN, DICT, ETCD, ZooKeeper, Kafka, KAFKACONN, KAFKASTRM-LL, and the file and Kafka loaders), the partition × replica cluster model, high availability and failover, data distribution and skew, how schema changes, data loading and queries flow through a cluster, and what consistency (transactions, isolation, read-after-write) clients get. Use this skill whenever the user asks how TigerGraph works, plans cluster size, HA or disaster recovery across sites, sees a service name in `gadmin status` or a log and wants to know what it does, asks why an operation is blocked when a node is down, or needs to know which service to look at for a problem. Does NOT cover running commands — use tigergraph-cli.
 compatibility: TigerGraph 3.10 or later. Written for self-managed clusters; on TigerGraph Savanna the same concepts apply but the cluster is managed for you.
 license: Apache-2.0
 metadata:
@@ -15,6 +15,19 @@ A high-level picture of a TigerGraph cluster, enough to reason about sizing, ava
 ## How to respond
 
 Lead with the answer (the sizing, the cause, the service to look at), then only the background that explains it, and point to the docs page for the rest. When diagnosing a live cluster, use the service roles and start order here to decide where to look, then confirm with real output (`gadmin status -v`, the service's logs) before naming a cause; the commands are in the tigergraph-cli skill.
+
+## Where answers come from
+
+- **This cluster's layout** comes from the cluster, not from defaults: `gadmin status -v` (instances, leader roles), `gadmin config get <Service>.BasicConfig.Nodes` (where a service runs), `gadmin config get System.HostList`, and `gadmin config list entry | grep -i -A2 <keyword>` for what a setting means and its value here. Use these whenever you have a shell on a node; the commands are in the tigergraph-cli skill.
+- **Design, sizing, HA, disaster-recovery and consistency questions** depend on the docs for the user's version ("Official documentation" below). Before answering, fetch the page in that table that matches the question, especially without cluster access. If your draft says "check the docs", "I'm not sure your version has it" or "I didn't verify", fetch the page and replace the hedge with what it says. Mark only what the docs don't settle as your inference.
+
+## Decisions that come up often
+
+- **A node fails.** On an HA cluster, queries keep running (in-flight ones can fail for up to about 30 seconds while routing adjusts, so clients should retry), but schema changes, installing queries, export and connector loading into the affected partition are blocked until the node is back or removed. Removing the failed node restores full operation with one fewer replica for that partition. With R = 1 there is no other copy, so the node's partitions are simply unavailable. Details: `references/clustering.md`.
+- **Minimum HA** is R >= 2 on at least 3 machines; two machines can't give HA at any R, because the coordination services need a majority.
+- **Surviving the loss of a whole site.** A region-aware cluster `[4.1+]` (Preview in the docs) needs at least 3 regions or zones. With two sites, run two clusters with cross-region replication (CRR): the DR cluster is read-only and in sync, writes resume after promoting it, and some things (for example gadmin configs and GraphStudio metadata) aren't replicated. The CRR pages list what is and isn't synced and the promotion steps for each version.
+- **GSQL failover.** One GSQL server is leader, the others standby; a standby takes over after the leader misses heartbeats for `Controller.LeaderElectionHeartBeatIntervalMS` x `Controller.LeaderElectionHeartBeatMaxMiss` (read both on the cluster). Clients reconnect only if they know every GSQL server's address. GSQL failover is not data HA.
+- **Sizing.** Each machine holds 1/P of one copy, so RAM per machine follows from the size of one copy. Estimate that copy with the method on the hardware requirements page (raw size, compression ratio, and a larger factor for algorithmic workloads such as PageRank), and take disk, SSD and network guidance from the same page. R is chosen at install. To change it on the same machines, repartition in place (`gadmin cluster expand --ha <R>`); adding machines is an expand. Both take the cluster offline for minutes rather than hours for typical sizes, need a backup and no running jobs, and need extra staging disk during the move (the repartition page gives the formula).
 
 ## What TigerGraph is
 
@@ -67,3 +80,9 @@ The TigerGraph Server docs are the source of truth. Pages follow `https://www.ti
 | What is limited when a node fails | `cluster-and-ha-management/ha-overview` |
 | Region-aware clusters | `cluster-and-ha-management/region-aware` |
 | Glossary of services | `reference/glossary` |
+| Transactions, isolation, read-after-write | `intro/transaction-and-acid` |
+| Repartition (change R in place) | `cluster-and-ha-management/repartition-a-cluster` |
+| GSQL leader failover | `cluster-and-ha-management/ha-for-gsql-server` |
+| Cross-region replication (CRR) | `cluster-and-ha-management/crr-index`, `cluster-and-ha-management/fail-over` |
+| Hardware sizing | `installation/hw-and-sw-requirements` |
+| Expand, shrink | `cluster-and-ha-management/expand-a-cluster`, `shrink-a-cluster` |

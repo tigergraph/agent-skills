@@ -19,7 +19,7 @@ A map of the commands a user runs on a TigerGraph node: which tool fits the job,
 - **A service is Down:** before starting it, find out whether it crashed or was stopped (`references/gadmin.md`, "status"); that decides whether it will happen again. If the cluster has one replica (`gadmin status -v` shows only `#1` instances), nothing else serves that partition; the lasting fix is HA, which needs a replication factor of at least 2 and more machines (tigergraph-cluster).
 - **Reproduce what the user sees, the way they see it.** If an app's REST call fails, make the same REST call (`curl` to the NGINX port, `$(gadmin config get Nginx.Port)`), not a `gsql` equivalent: the error the app gets is the one to explain.
 - **"Don't change anything" or "don't run it yet"** rules out the change, not read-only checks. Look at the cluster (which graphs exist, current values, recent logs) so the answer fits it.
-- **Answering a question:** lead with the command to run next, or the cause and fix. Add background only where it changes what the user should do, keep warnings to the ones that apply, and point to the docs page for the rest.
+- **Answering a question:** lead with the command to run next, or the cause and fix. Put every command or query the user needs in the reply itself; files you wrote along the way aren't visible to them. Add background only where it changes what the user should do, keep warnings to the ones that apply, and point to the docs page for the rest.
 
 ## Where answers come from
 
@@ -72,13 +72,16 @@ Drop trailing fields to widen the match (`GPE_1` = every replica of partition 1,
 
 The cluster scripts `grun`, `grun_p`, `gscp` and `gfetch` take `all`, a lowercase service name (`gpe`), or a node list (`m1,m2`), not instance IDs. `gssh` takes a node name.
 
-Node names such as `m1` and `m2` are TigerGraph's aliases, not hostnames, so a plain `ssh m2` usually fails. Reach other nodes with the cluster scripts (`grun m2 '<cmd>'`, `gssh m2 '<cmd>'`), or ssh to the IP that `gssh` lists.
+Node names such as `m1` and `m2` are TigerGraph's aliases, not hostnames, so a plain `ssh m2` usually fails. Reach other nodes with the cluster scripts (`grun m2 '<cmd>'`, `gssh m2 '<cmd>'`), or ssh to the IP that `gssh` lists. The remote shell may not have TigerGraph's tools on its `PATH` ("gadmin: command not found"); call them by full path, `$(gadmin config get System.AppRoot)/cmd/<tool>`, which is the same on every node.
 
 ## Which command for which job
 
+- **Health check:** `gadmin status -v`, then what services don't show: disk on every node (`grun all 'df -h'`), clocks in sync across nodes (the cluster needs NTP or similar; compare `grun all date` and check a time service is running), and `gadmin license status`.
 - **Look, change nothing:** `gadmin status -v`, `gadmin config get`, `gadmin log`, `gadmin metric`, `ghostname`, `gssh` with no arguments, `gstatusgraph`.
 - **Lifecycle and configuration:** `gadmin start | stop | restart`; `gadmin config set` then `gadmin config apply` (changes are staged until applied; restart the affected services afterwards, or use `apply --restart-deps` `[4.1+]`).
-- **Schema, data, queries, users:** `gsql`.
+- **Schema, data, queries, users:** `gsql`. Inventory, counts and schema-change rules are in `references/gsql.md`: check whether a type is global or local first, and expect a schema change to disable loading jobs and uninstall queries that use what it drops or alters.
+- **Resource use:** `gadmin metric` per service. On containers and shared hosts, `free` and `nproc` show the host, not the node's limits, so compare against the container's limits before concluding anything.
+- **Loading from Kafka, S3 or other sources:** these run as data sources and loading jobs (`gsql 'SHOW DATA_SOURCE *'`, `gadmin connector list`). The KAFKA, KAFKACONN and KAFKASTRM-LL services in `gadmin status` are TigerGraph's internal plumbing, present whether or not any Kafka source is configured.
 - **Did a load work, what was rejected:** each loading run writes a summary with rejected lines by reason; `gadmin log` shows the loader log directories (`references/gsql.md`, "Loading results").
 - **What is running now, stop one query:** the REST built-in endpoints list running queries and abort one by request ID (docs: `API/built-in-endpoints`); prefer that to restarting GPE.
 - **Who can log in, what they can do, whether REST needs a token:** `gsql 'SHOW USER'`, roles granted per graph, and `gadmin config get RESTPP.Factory.EnableAuth` (docs: `user-access/` pages).
@@ -130,5 +133,7 @@ The TigerGraph Server docs are the source of truth. Pages follow `https://www.ti
 | License | `installation/license` |
 | Log files and rotation | `troubleshooting/log-files` |
 | Audit logs | `troubleshooting/audit-log` |
+
+The GSQL language reference (schema changes, loading jobs, query syntax) has its own versioned site: `https://www.tigergraph.com/docs/gsql-ref/<version>/<page>`, for example `ddl-and-loading/modifying-a-graph-schema`.
 
 For TigerGraph Savanna, see `https://www.tigergraph.com/docs/savanna/main/overview/`.
