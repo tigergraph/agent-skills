@@ -58,7 +58,7 @@ Read `gsql ls` first to see whether a type is global (listed without a graph; sh
 
 - Global types change through a `GLOBAL SCHEMA_CHANGE JOB` (after `USE GLOBAL`), local ones through a graph's `SCHEMA_CHANGE JOB`. A global change affects every graph that uses the type.
 - An attribute's type can't be changed in place. Dropping and re-adding it loses the stored values; adding a new attribute, backfilling it and switching readers over keeps them.
-- After a change, queries and loading jobs that refer to dropped types or attributes become invalid: queries are uninstalled and loading jobs disabled (older releases dropped them), and they must be recreated. GSQL lists what it will disable when the job runs.
+- After a change, queries and loading jobs it invalidates are uninstalled or disabled, and they must be recreated: disabled loading jobs can't be re-enabled (older releases dropped them instead). Adding an attribute counts: a loading job that loads the type positionally (`VALUES($0, $1, $2)`) no longer matches it and is disabled. GSQL only reports what it disabled after the job has run, so list the jobs and queries that use the type (`gsql -g <graph> ls`) and tell the user which will break before running it.
 - A `SCHEMA_CHANGE JOB` stays in the catalog after it runs (`DROP JOB` removes it), so its presence doesn't mean it is pending. Check whether its changes are already in the schema (`ls`) and look for the run in the GSQL log (`gadmin log gsql`).
 - `DROP GRAPH` removes the graph, its jobs and queries and its local types; global types it used, and their data, stay.
 

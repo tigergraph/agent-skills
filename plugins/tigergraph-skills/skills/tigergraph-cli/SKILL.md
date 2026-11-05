@@ -97,12 +97,14 @@ Node names such as `m1` and `m2` are TigerGraph's aliases, not hostnames, so a p
 These commands delete data, change the cluster layout, or interrupt work:
 
 - `gadmin reset`, `gadmin init`, `gsql --reset`, `DROP ALL`, and `CLEAR GRAPH STORE` (deletes the data of every graph, not only the one in use; to empty one graph, delete its vertex types' data instead);
+- deleting data (REST delete endpoints, `DELETE` in queries): deleting a vertex also deletes its edges, so emptying one vertex type can empty edge types the user didn't mention;
+- schema changes, including adding an attribute: they can disable loading jobs (for good) and uninstall queries that use the type (`references/gsql.md`, "Schema changes");
 - `gadmin cluster expand`, `shrink` and `remove`;
 - `gadmin backup restore` (offline while it runs, rolls back every graph, can't be cancelled once started; to roll back one graph, export/import that graph instead), `remove` and `retain`;
 - `gadmin upgrade`;
 - restarts: `gadmin restart all`, and `gadmin config apply --restart-deps`.
 
-Before running one of these, tell the user what it will do and what it can't undo, and get their go-ahead; if they already asked for that exact action, their request is the go-ahead. When you only write commands for the user to run, mark these as destructive instead. Some documented procedures use these commands on purpose (changing a node's IP re-initialises ETCD and the cluster; upgrades go through the installer). For those, give the documented steps for the user's version, with the downtime and a backup first, rather than improvising a shorter path or only sending the user to Support.
+Before running one of these, tell the user what it will do and what it can't undo, and get their go-ahead. A request covers only what the user can see they asked for: "delete the products" is a go-ahead to delete products, not the orders that go with them. If the action reaches further (edges, other graphs, disabled jobs, restarts of services others use), describe that first and wait for confirmation, even when the user said "go ahead". If you've been told not to change the cluster, give the commands instead of running them. When you only write commands for the user to run, mark these as destructive instead. Some documented procedures use these commands on purpose (changing a node's IP re-initialises ETCD and the cluster; upgrades go through the installer). For those, give the documented steps for the user's version, with the downtime and a backup first, rather than improvising a shorter path or only sending the user to Support.
 
 Passwords on the command line (`gsql -p ...`) end up in shell history and process lists. Prefer letting `gsql -u <user>` prompt; for scripted access, use the REST API with a token.
 
@@ -110,7 +112,7 @@ Kafka, ETCD and ZooKeeper hold cluster state, and a wrong repair can leave the c
 
 ## Official documentation
 
-The TigerGraph Server docs are the source of truth. Pages follow `https://www.tigergraph.com/docs/tigergraph-server/<version>/<page>`, where `<version>` is the major.minor release, such as `3.10`, `4.1`, `4.2` or `4.3`; there is no `current` or `latest` alias. Fetch the page for the user's version when you need detail beyond this skill. A release whose docs aren't published yet returns 404: use the closest earlier version and say so. Prefer the installed `--help` when the two disagree.
+The TigerGraph Server docs are the source of truth. Pages follow `https://www.tigergraph.com/docs/tigergraph-server/<version>/<page>`, where `<version>` is the major.minor release, such as `3.10`, `4.1`, `4.2` or `4.3`; there is no `current` or `latest` alias. Fetch the page for the user's version when you need detail beyond this skill: with a web-fetch tool if you have one, otherwise `curl -sL <url> | sed 's/<[^>]*>//g'` from a shell gives readable text. A release whose docs aren't published yet returns 404: use the closest earlier version and say so. Prefer the installed `--help` when the two disagree.
 
 | Topic | Page |
 |---|---|

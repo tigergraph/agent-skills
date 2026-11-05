@@ -70,7 +70,7 @@ For the commands themselves, use the tigergraph-cli skill.
 
 ## Official documentation
 
-The TigerGraph Server docs are the source of truth. Pages follow `https://www.tigergraph.com/docs/tigergraph-server/<version>/<page>`, where `<version>` is the major.minor release, such as `3.10`, `4.1`, `4.2` or `4.3`; there is no `current` or `latest` alias. Fetch the page for the user's version when you need detail beyond this skill. A release whose docs aren't published yet returns 404: use the closest earlier version and say so.
+The TigerGraph Server docs are the source of truth. Pages follow `https://www.tigergraph.com/docs/tigergraph-server/<version>/<page>`, where `<version>` is the major.minor release, such as `3.10`, `4.1`, `4.2` or `4.3`; there is no `current` or `latest` alias. Fetch the page for the user's version when you need detail beyond this skill: with a web-fetch tool if you have one, otherwise `curl -sL <url> | sed 's/<[^>]*>//g'` from a shell gives readable text. A release whose docs aren't published yet returns 404: use the closest earlier version and say so.
 
 | Topic | Page |
 |---|---|
