@@ -17,7 +17,7 @@ Partition P      PP·R1       PP·R2             PP·RR
 
 - HA needs R ≥ 2 and a cluster of at least 3 machines.
 - Smallest HA cluster: 3 machines as 1 partition × 3 replicas. Smallest HA cluster with partitioning: 2 × 2 (4 machines).
-- ETCD, ZooKeeper and DICT run on an odd number of nodes and need a majority of them up, independent of R. That is why HA needs 3 machines even when R = 2.
+- ZooKeeper and ETCD need more than half of their nodes up, independent of R. That is why HA needs 3 machines even when R = 2.
 
 ## Replication
 

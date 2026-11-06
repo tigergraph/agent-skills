@@ -1,30 +1,30 @@
 # Services
 
-The services `gadmin status` lists, what each does, and how many instances run by default.
+The services `gadmin status` lists and what each does.
 
 ## At a glance
 
-| Service | Role | Default instances |
-|---|---|---|
-| GPE | Graph Processing Engine: holds the graph, runs queries and updates | one per partition × replica |
-| GSE | Graph Storage Engine: runs the ID service that translates user IDs and internal IDs | one per partition × replica |
-| RESTPP | REST API: built-in endpoints, installed-query endpoints, loading requests | every node |
-| GSQL | GSQL server: schema, loading jobs, query compilation; serves the `gsql` client | up to 5 nodes; one leader (`gsql --leader`) |
-| GUI | Backend for GraphStudio and Admin Portal | up to 3 nodes |
-| NGINX | HTTP gateway and TLS termination | every node |
-| CTRL | Controller: the cluster-management service `gadmin` talks to | up to 3 nodes |
-| EXE | Executor: carries out management actions on its node | every node |
-| IFM | Informant: health and metrics | up to 3 nodes |
-| ADMIN | Per-node management service | every node |
-| DICT | Dictionary: catalog and system metadata | odd number of nodes, at most 5 |
-| ETCD | Configuration and coordination store | odd number of nodes, at most 5 |
-| ZK | ZooKeeper: distributed coordination | odd number of nodes, at most 5 |
-| KAFKA | Internal message passing between services | every node |
-| KAFKACONN | Kafka Connect runtime for `DATA_SOURCE` loading (S3, Kafka, warehouses) | every node |
-| KAFKASTRM-LL | Aggregates loading statistics for loading-status queries | every node |
-| TS3, TS3SERV `[before 4.1]` | Monitoring backend for Admin Portal; removed in 4.1 | |
+| Service | Role |
+|---|---|
+| GPE | Graph Processing Engine: holds the graph, runs queries and updates |
+| GSE | Graph Storage Engine: runs the ID service that translates user IDs and internal IDs |
+| RESTPP | REST API: built-in endpoints, installed-query endpoints, loading requests |
+| GSQL | GSQL server: schema, loading jobs, query compilation; serves the `gsql` client |
+| GUI | Backend for GraphStudio and Admin Portal |
+| NGINX | HTTP gateway and TLS termination |
+| CTRL | Controller: the cluster-management service `gadmin` talks to |
+| EXE | Executor: carries out management actions on its node |
+| IFM | Informant: health and metrics |
+| ADMIN | Per-node management service |
+| DICT | Dictionary: catalog and system metadata |
+| ETCD | Configuration and coordination store |
+| ZK | ZooKeeper: distributed coordination |
+| KAFKA | Internal message passing between services |
+| KAFKACONN | Kafka Connect runtime for `DATA_SOURCE` loading (S3, Kafka, warehouses) |
+| KAFKASTRM-LL | Aggregates loading statistics for loading-status queries |
+| TS3, TS3SERV `[before 4.1]` | Monitoring backend for Admin Portal; removed in 4.1 |
 
-The counts are installer defaults. DICT, ETCD and ZK use the largest odd number of nodes up to 5, so a 2-node cluster has one of each and a 4-node cluster three; that is why HA needs at least 3 machines. Run `gssh` with no arguments to see where each service runs on a given cluster.
+ZooKeeper and ETCD need more than half of their nodes up, which is why HA needs at least 3 machines. Run `gssh` with no arguments to see where each service runs on a given cluster.
 
 ## Reading instance IDs
 

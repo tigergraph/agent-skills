@@ -31,7 +31,7 @@ Lead with the answer (the sizing, the cause, the service to look at), then only 
 
 ## What TigerGraph is
 
-A distributed native parallel graph database. The core engine is written in C++ and has two parts:
+A distributed native parallel graph database. Its core engine has two parts:
 
 - **GPE** (Graph Processing Engine) holds the graph and executes queries and updates.
 - **GSE** (Graph Storage Engine) runs the ID service (IDS), which translates between the IDs users see and internal IDs.
