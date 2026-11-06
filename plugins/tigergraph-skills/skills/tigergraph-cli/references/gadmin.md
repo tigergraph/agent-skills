@@ -41,7 +41,7 @@ Plain `apply` writes the change but restarts nothing; it ends with "Please resta
 
 Some settings aren't entries of their own but options packed into one entry's value (for example a service's `BasicConfig.Env`). When the docs say to add an option there, `get` the current value and append to it rather than replacing it.
 
-Don't dump the whole configuration to read one value: it includes passwords and keys. Read single entries with `get`.
+Don't dump the whole configuration to read one value: it includes passwords and keys. Read single entries with `get`, and not the ones that hold secrets (`SKILL.md`, "Where answers come from").
 
 ## start, stop, restart
 
