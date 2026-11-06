@@ -66,7 +66,7 @@ The docs advise backing up first and avoiding high-traffic periods; check `ddl-a
 
 ## Loading results
 
-`RUN LOADING JOB` reports per file how many lines loaded and how many were rejected. Afterwards, each run leaves a directory under the loader's log directory (`gadmin log` lists it, e.g. `RESTPP-LOADER` for file loading) named after the graph, job and node, with a `summary` file that counts rejected lines by reason (not enough tokens, invalid attributes, ...) and gives sample line numbers. A load that "didn't add rows" usually means rejected lines, or valid lines whose IDs already existed: loading upserts, so existing IDs update instead of adding vertices. Compare the vertex count before and after, and the file's IDs with existing ones.
+`RUN LOADING JOB` reports per file how many lines loaded and how many were rejected. Afterwards, each run leaves a directory under the loader's log directory (`gadmin log` lists it, e.g. `RESTPP-LOADER` for file loading) named after the graph, job and node, with a `summary` file that counts rejected lines by reason (not enough tokens, invalid attributes, ...) and gives sample line numbers. A load that "didn't add rows" usually means rejected lines, or valid lines whose IDs already existed: loading upserts, so existing IDs update instead of adding vertices. Compare the vertex count before and after, and the file's IDs with existing ones. Edges behave the same way: rows with the same source and target overwrite one another unless the edge type has a discriminator, so a file with repeated pairs loads fewer edges than it has rows. Compare distinct (source, target) pairs in the file with the edge count.
 
 ## Users and roles
 
