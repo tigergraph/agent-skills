@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "tigergraph",
+  "description": "Official TigerGraph plugins for AI coding agents",
+  "owner": {
+    "name": "TigerGraph Inc.",
+    "email": "support@tigergraph.com",
+    "url": "https://www.tigergraph.com"
+  },
+  "plugins": [
+    {
+      "name": "tigergraph",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/tigergraph/tigergraph-mcp.git",
+        "path": "plugins/tigergraph"
+      },
+      "description": "Connect to any TigerGraph deployment through the TigerGraph MCP server. Explore the schema, run GSQL and Cypher, load data, and search vector embeddings."
+    },
+    {
+      "name": "tigergraph-skills",
+      "source": "./plugins/tigergraph-skills",
+      "description": "TigerGraph skills for agents: operate a cluster from the command line and understand how it works."
+    }
+  ]
+}
