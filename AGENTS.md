@@ -54,7 +54,7 @@ These skills ship to customers and to public registries. Before you open a PR, c
 
 - source repository names, source paths, or internal class, constant or file names;
 - internal URLs (issue tracker, wiki, internal docs or repositories) or customer names;
-- commands that print secrets or full configuration dumps (warning against them without naming the command is fine);
+- instructions to run commands that print secrets or full configuration dumps. Naming such a command inside an explicit warning not to run it is fine, since an agent can only avoid a command it recognizes;
 - repair or reset procedures for internal services. Point to TigerGraph Support instead.
 
 When in doubt, keep to what [docs.tigergraph.com](https://docs.tigergraph.com) already says.
